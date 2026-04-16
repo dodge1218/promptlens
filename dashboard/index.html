@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your PromptLens Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e4e4e7;
+    --muted: #9ca3af;
+    --accent: #818cf8;
+    --accent2: #34d399;
+    --accent3: #f472b6;
+    --accent4: #fbbf24;
+    --accent5: #60a5fa;
+    --danger: #ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; line-height:1.6; }
+  .container { max-width:1200px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:2rem; font-weight:700; margin-bottom:4px; }
+  .subtitle { color:var(--muted); font-size:0.9rem; margin-bottom:32px; }
+  h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:var(--accent); }
+  .section { margin-bottom:40px; }
+
+  /* Summary Cards */
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:40px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .card .label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:4px; }
+  .card .value { font-size:1.75rem; font-weight:700; }
+  .card .detail { font-size:0.8rem; color:var(--muted); margin-top:4px; }
+  .card .value.accent { color:var(--accent); }
+  .card .value.green { color:var(--accent2); }
+  .card .value.pink { color:var(--accent3); }
+  .card .value.yellow { color:var(--accent4); }
+
+  /* Charts */
+  .chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:768px){ .chart-grid { grid-template-columns:1fr; } }
+  .chart-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; }
+  .chart-card canvas { max-height:320px; }
+
+  /* Topics */
+  .topic-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; }
+  .topic-item { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; justify-content:space-between; align-items:center; }
+  .topic-name { font-weight:600; font-size:0.95rem; }
+  .topic-meta { color:var(--muted); font-size:0.8rem; }
+  .topic-badge { background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+
+  /* Loop callout */
+  .loop-callout { background:linear-gradient(135deg,#2a1a1a,#1a1d27); border:1px solid #7f1d1d; border-radius:12px; padding:24px; }
+  .loop-callout .loop-title { display:flex; align-items:center; gap:8px; font-size:1.1rem; font-weight:600; color:var(--danger); margin-bottom:8px; }
+  .loop-detail { color:var(--muted); font-size:0.9rem; }
+  .loop-detail strong { color:var(--text); }
+  .pill { display:inline-block; background:#7f1d1d; color:#fca5a5; font-size:0.75rem; padding:2px 10px; border-radius:999px; margin-top:8px; }
+
+  footer { text-align:center; color:var(--muted); font-size:0.8rem; padding:40px 0 24px; border-top:1px solid var(--border); margin-top:40px; }
+  footer a { color:var(--accent); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔍 Your PromptLens Report</h1>
+  <p class="subtitle">215 conversations analyzed · Generated Apr 15, 2026</p>
+
+  <!-- Usage DNA Cards -->
+  <div class="section">
+    <h2>📊 Usage DNA</h2>
+    <div class="cards">
+      <div class="card"><div class="label">Avg Prompt Length</div><div class="value accent">39.5</div><div class="detail">words (median: 23)</div></div>
+      <div class="card"><div class="label">Vocabulary Richness</div><div class="value green">18%</div><div class="detail">4,610 unique / 25,618 total</div></div>
+      <div class="card"><div class="label">Avg Conversation</div><div class="value pink">6.7</div><div class="detail">turns per session</div></div>
+      <div class="card"><div class="label">Sessions / Week</div><div class="value yellow">43</div><div class="detail">Most active: Monday @ 4 UTC</div></div>
+      <div class="card"><div class="label">Complexity Trend</div><div class="value">Stable</div><div class="detail">No significant drift</div></div>
+      <div class="card"><div class="label">Total Messages</div><div class="value accent">695</div><div class="detail">across 215 conversations</div></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="section">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h2>🧩 Prompt Shapes</h2>
+        <canvas id="shapesChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h2>🎯 Intent Distribution</h2>
+        <canvas id="intentsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topics -->
+  <div class="section">
+    <h2>🧠 Topic Clusters (20 discovered)</h2>
+    <div class="topic-list" id="topicList"></div>
+  </div>
+
+  <!-- Loop Detection -->
+  <div class="section">
+    <h2>🔁 Loop Detection</h2>
+    <div class="loop-callout">
+      <div class="loop-title">⚠️ 1 Repeated Pattern Detected</div>
+      <div class="loop-detail">
+        <strong>Topic:</strong> openclaw<br>
+        <strong>Conversations:</strong> "Gateway Password Recovery" ↔ "OpenClaw vs Paperclip"<br>
+        <strong>Similarity:</strong> 0.413 · <strong>Messages:</strong> 14 · <strong>Date range:</strong> Apr 9–13, 2026
+      </div>
+      <span class="pill">unresolved · repeated_question</span>
+    </div>
+  </div>
+</div>
+
+<footer>Generated by <a href="https://github.com/dodge1218/promptlens" target="_blank">PromptLens</a></footer>
+
+<script>
+const colors = ['#818cf8','#34d399','#f472b6','#fbbf24','#60a5fa','#a78bfa','#fb923c','#2dd4bf','#f87171'];
+
+// Prompt Shapes - Donut
+new Chart(document.getElementById('shapesChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Medium Instruction','Short Command','Long Instruction','Ultra Short','Medium Question','Short Question','Essay Prompt','Code Paste','Code Snippet'],
+    datasets: [{
+      data: [265,137,113,57,50,36,24,8,5],
+      backgroundColor: colors,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '55%',
+    plugins: {
+      legend: { position:'bottom', labels:{ color:'#9ca3af', padding:12, font:{size:11} } }
+    }
+  }
+});
+
+// Intent Distribution - Bar
+new Chart(document.getElementById('intentsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Other','Question','Instruction','Brainstorm','Debug','Meta','Creative'],
+    datasets: [{
+      data: [288,202,79,46,44,27,9],
+      backgroundColor: colors,
+      borderRadius: 6,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    indexAxis: 'y',
+    plugins: { legend:{ display:false } },
+    scales: {
+      x: { ticks:{color:'#9ca3af'}, grid:{color:'#2a2d3a'} },
+      y: { ticks:{color:'#e4e4e7'}, grid:{display:false} }
+    }
+  }
+});
+
+// Topics
+const topics = [
+  {name:"Boss / Union / Meeting",convos:20,msgs:146},
+  {name:"Does / Company / Justify",convos:20,msgs:75},
+  {name:"Person / People / Content",convos:18,msgs:35},
+  {name:"Different / Frontier / Human",convos:16,msgs:55},
+  {name:"Did / Resume / Gave",convos:14,msgs:25},
+  {name:"Paper / Write / Claude",convos:13,msgs:24},
+  {name:"Api / History / Entire",convos:12,msgs:39},
+  {name:"Business / Application / Apply",convos:11,msgs:18},
+  {name:"Openclaw / Home / Meetup",convos:10,msgs:39},
+  {name:"Oil / Wtf / Wait",convos:10,msgs:25},
+  {name:"Context / Window / Tokens",convos:9,msgs:19},
+  {name:"Data / Claw / Companies",convos:8,msgs:19},
+  {name:"Run / Error / Reset",convos:8,msgs:23},
+  {name:"Gut / Gbdi / Biome",convos:8,msgs:35},
+  {name:"Guardrail / Approach / Loopers",convos:8,msgs:35},
+  {name:"Days / Prompt / York",convos:8,msgs:19},
+  {name:"Spoderman / Meme / Generate",convos:7,msgs:27},
+  {name:"Trade / Pelt / Van",convos:6,msgs:14},
+  {name:"Understand / Help / Agents",convos:5,msgs:14},
+  {name:"Kendrick / Lamar / Spotify",convos:4,msgs:9}
+];
+const list = document.getElementById('topicList');
+topics.forEach((t,i) => {
+  list.innerHTML += `<div class="topic-item"><div><div class="topic-name">${i+1}. ${t.name}</div><div class="topic-meta">${t.msgs} messages</div></div><div class="topic-badge">${t.convos} convos</div></div>`;
+});
+</script>
+</body>
+</html>
