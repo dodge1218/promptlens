@@ -148,7 +148,7 @@ Your conversations are yours. PromptLens just helps you see them clearly.
 
 ## Roadmap
 
-- [ ] HTML dashboard with visualizations
+- [x] HTML dashboard with visualizations
 - [ ] Comparison mode: your patterns vs public datasets
 - [ ] Prompt quality scoring (specificity, context density)
 - [ ] Time-series analysis (how your prompting evolves)
