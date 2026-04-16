@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PromptLens Input Schema",
+  "description": "Schema for ChatGPT conversation exports (official OpenAI export or ChatPort export)",
+  "type": "object",
+  "required": ["conversations"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Optional export metadata (present in ChatPort exports)",
+      "properties": {
+        "export_tool": { "type": "string" },
+        "export_version": { "type": "string" },
+        "export_date": { "type": "string", "format": "date-time" },
+        "total_conversations": { "type": "integer" },
+        "date_range": {
+          "type": "object",
+          "properties": {
+            "earliest": { "type": ["string", "null"] },
+            "latest": { "type": ["string", "null"] }
+          }
+        },
+        "export_duration_seconds": { "type": "number" }
+      }
+    },
+    "conversations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "mapping"],
+        "properties": {
+          "title": { "type": ["string", "null"] },
+          "create_time": { "type": ["number", "null"], "description": "Unix timestamp" },
+          "update_time": { "type": ["number", "null"], "description": "Unix timestamp" },
+          "conversation_id": { "type": "string" },
+          "current_node": { "type": ["string", "null"] },
+          "moderation_results": { "type": "array" },
+          "mapping": {
+            "type": "object",
+            "description": "Tree of message nodes keyed by node ID",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["id", "children"],
+              "properties": {
+                "id": { "type": "string" },
+                "parent": { "type": ["string", "null"] },
+                "children": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "message": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "author": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": ["system", "user", "assistant", "tool"]
+                        },
+                        "name": { "type": ["string", "null"] },
+                        "metadata": { "type": "object" }
+                      }
+                    },
+                    "create_time": { "type": ["number", "null"] },
+                    "update_time": { "type": ["number", "null"] },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "content_type": {
+                          "type": "string",
+                          "enum": ["text", "code", "execution_output", "tether_browsing_display", "tether_quote", "multimodal_text", "system_error"]
+                        },
+                        "parts": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    },
+                    "status": { "type": "string" },
+                    "end_turn": { "type": ["boolean", "null"] },
+                    "weight": { "type": "number" },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Message metadata including model info",
+                      "properties": {
+                        "model_slug": { "type": ["string", "null"] },
+                        "default_model_slug": { "type": ["string", "null"] },
+                        "message_type": { "type": ["string", "null"] },
+                        "finish_details": { "type": ["object", "null"] },
+                        "request_id": { "type": "string" },
+                        "message_source": { "type": ["string", "null"] }
+                      }
+                    },
+                    "recipient": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
