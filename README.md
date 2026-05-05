@@ -16,6 +16,15 @@ python -m promptlens analyze conversations.json
 
 ---
 
+
+## Full writeup and example prompts
+
+PromptLens is a work in progress. For the broader product thesis, example prompts, and why this category matters, see Ryan's Google Cloud NEXT writing-challenge article:
+
+**[Google Just Unlocked Something Huge With Gemini Memory Import, Here’s How to Actually Profit From It](https://dev.to/vonb/google-just-unlocked-something-huge-with-gemini-memory-import-heres-how-to-actually-profit-from-2ckf)**
+
+That piece explains the larger workflow: once a user can import or export AI history, the next step is turning that archive into practical intelligence, voice profiles, unfinished-idea mining, pattern recognition, personal SOPs, and decision archaeology. PromptLens is the local/open-source prototype layer for that same direction.
+
 ## Why
 
 AI platforms already understand broad usage patterns: what people ask for, where conversations loop, which workflows keep recurring, and how prompt structure changes outcomes.
