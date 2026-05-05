@@ -1,9 +1,11 @@
 # PromptLens
 
-**See how you actually use AI.** Topic patterns, conversation loops, prompt shapes, and usage DNA from your own ChatGPT history.
+**Local-first AI usage analytics for your own exported conversations.**
 
-```
-promptlens analyze conversations.json
+PromptLens turns personal AI conversation exports into readable, local reports: topic clusters, prompt patterns, unresolved loops, and workflow signals.
+
+```bash
+python -m promptlens analyze conversations.json
 ```
 
 <p align="center">
@@ -16,21 +18,32 @@ promptlens analyze conversations.json
 
 ## Why
 
-Every AI provider already has analytics on your usage — topic clusters, prompt patterns, conversation loops, engagement curves. They use it for model training, safety research, and product decisions.
+AI platforms already understand broad usage patterns: what people ask for, where conversations loop, which workflows keep recurring, and how prompt structure changes outcomes.
 
-You can't see any of it.
+Individual users usually do not get that visibility into their own exports.
 
-PromptLens gives you the same insights from your own data. Export your conversations, run the pipeline, see your patterns. No API calls. No cloud. Everything stays on your machine.
+PromptLens is a small, readable prototype for personal AI-usage analytics. It processes exports locally and produces artifacts that help a user answer questions like:
+
+- What do I keep asking AI systems to help with?
+- Where do conversations loop without resolving?
+- Which prompt structures do I use most?
+- What workflows are becoming repeated operating patterns?
+
+## Market signal
+
+This repo sits in the same product direction as the AI-usage analytics and personal-workflow insight tools recently highlighted around Google Next / hackathon-style demos: users and teams want visibility into how they actually use AI, not just access to another chat box.
+
+PromptLens is independent, unaffiliated, and deliberately local-first: no cloud account, no telemetry, no API calls, and no vendor lock-in.
 
 ## What It Finds
 
 | Module | What It Does |
 |--------|-------------|
-| **Topic Clustering** | Groups your conversations into discovered topics using TF-IDF |
-| **Intent Classification** | Labels each prompt: question, instruction, brainstorm, debug, creative, meta |
-| **Loop Detection** | Finds conversations where you asked the same thing twice (and didn't resolve it) |
-| **Prompt Shapes** | Categorizes prompts by structure: short command, medium instruction, essay, code paste, etc. |
-| **Usage DNA** | Your fingerprint: vocabulary richness, prompt length distribution, active hours, session frequency |
+| **Topic Clustering** | Groups conversations into discovered topics using TF-IDF |
+| **Intent Classification** | Labels prompts: question, instruction, brainstorm, debug, creative, meta |
+| **Loop Detection** | Finds conversations where similar requests recur without clear resolution |
+| **Prompt Shapes** | Categorizes prompt structure: short command, medium instruction, essay, code paste, etc. |
+| **Workflow Signals** | Summarizes vocabulary, prompt length distribution, activity patterns, and repeated workflows |
 
 ## Install
 
@@ -38,13 +51,13 @@ PromptLens gives you the same insights from your own data. Export your conversat
 pip install -r requirements.txt
 ```
 
-Requires: Python 3.10+, scikit-learn, numpy. No GPU. No API keys. No network access.
+Requires Python 3.10+, scikit-learn, and numpy. No GPU, API key, or network access required.
 
 ## Usage
 
 ### 1. Export your data
 
-**ChatGPT:** Settings → Data Controls → Export Data → download `conversations.json`
+For ChatGPT: Settings → Data Controls → Export Data → download `conversations.json`.
 
 ### 2. Run analysis
 
@@ -53,34 +66,27 @@ python -m promptlens analyze conversations.json
 ```
 
 Options:
-```
---output-dir DIR     Output directory (default: ./promptlens-output)
---topics N           Number of topics to discover (default: 20)
---similarity-threshold F   Loop detection threshold (default: 0.4)
+
+```text
+--output-dir DIR              Output directory (default: ./promptlens-output)
+--topics N                    Number of topics to discover (default: 20)
+--similarity-threshold F      Loop detection threshold (default: 0.4)
 ```
 
 ### 3. Read your report
 
-```
+```text
 promptlens-output/
-├── report.md      ← Human-readable summary
-├── topics.json    ← Topic clusters with keywords & conversation IDs
-├── intents.json   ← Intent distribution across all prompts
-├── loops.json     ← Detected conversation loops
-└── shapes.json    ← Prompt shapes + usage DNA fingerprint
-```
-
-### Multiple exports
-
-Merge exports from different platforms or time periods:
-
-```bash
-python -m promptlens analyze chatgpt-export.json claude-export.json grok-export.json
+├── report.md      ← human-readable summary
+├── topics.json    ← topic clusters with keywords and conversation IDs
+├── intents.json   ← intent distribution across prompts
+├── loops.json     ← detected recurring conversation loops
+└── shapes.json    ← prompt-shape and workflow-signal summary
 ```
 
 ## Example Output
 
-```
+```text
 PromptLens v0.1.0
 Input: conversations.json
 Output: ./promptlens-output/
@@ -89,70 +95,49 @@ Output: ./promptlens-output/
   → conversations.json: 215 conversations (chatgpt)
   → Total: 215 conversations, 695 user messages
 [2/5] Extracting topics...
-  ✓ topics.json (18,432 bytes)
+  ✓ topics.json
 [3/5] Classifying intents...
-  ✓ intents.json (312 bytes)
+  ✓ intents.json
 [4/5] Detecting loops...
-  ✓ loops.json (891 bytes)
+  ✓ loops.json
 [5/5] Analyzing prompt shapes...
-  ✓ shapes.json (1,204 bytes)
+  ✓ shapes.json
 Generating report...
   ✓ report.md
-
-Done. 215 conversations → ./promptlens-output/
 ```
-
-### Sample Usage DNA
-
-```
-Average prompt length: 39.5 words
-Median prompt length: 23 words
-Vocabulary richness: 0.18 (4,610 unique / 25,618 total)
-Avg conversation length: 6.7 turns
-Sessions/week: 43
-```
-
-### Sample Prompt Shapes
-
-| Shape | % |
-|-------|---|
-| Medium instruction (16-50 words, directive) | 38.1% |
-| Short command (≤15 words, imperative) | 19.7% |
-| Long instruction (50+ words) | 16.3% |
-| Ultra short ("yes", "continue") | 8.2% |
-| Questions | 12.4% |
 
 ## How It Works
 
-- **No ML models required.** Topic clustering uses TF-IDF + k-means from scikit-learn. Intent classification is rule-based (prompt structure analysis). Loop detection uses cosine similarity between conversation TF-IDF vectors.
-- **~500 lines of Python.** Deliberately simple. You can read every line in 20 minutes.
-- **Deterministic.** Same input → same output, every time. No randomness, no API calls.
-- **Fast.** 215 conversations in under 10 seconds on a laptop.
+- **No hosted model required.** Topic clustering uses TF-IDF + k-means from scikit-learn.
+- **Rule-based classification.** Intent and prompt-shape labels are simple, inspectable heuristics.
+- **Deterministic.** Same input, same output.
+- **Readable code.** The prototype is intentionally small enough to audit quickly.
 
 ## Input Format
 
-Accepts:
-1. **Official OpenAI export** — `conversations.json` from Settings → Data Controls → Export
-2. **Any export with OpenAI's `mapping` structure** — same conversation tree format
+Currently accepts:
 
-See [`schema.json`](schema.json) for the full input schema.
+1. Official OpenAI export, `conversations.json` from Settings → Data Controls → Export.
+2. Any export with the same conversation `mapping` structure.
+
+See [`schema.json`](schema.json) for the input schema.
 
 ## Privacy
 
-- **Zero network calls.** The pipeline never touches the internet.
-- **Read-only.** Input files are never modified.
-- **No telemetry.** No analytics. No data collection. No phoning home.
-- **Local only.** All processing happens on your machine. Output stays in your output directory.
+- **Zero network calls.** The pipeline does not contact external services.
+- **Read-only input.** Source exports are never modified.
+- **No telemetry.** No analytics, tracking, or usage collection.
+- **Local output.** Reports stay in the directory you choose.
 
-Your conversations are yours. PromptLens just helps you see them clearly.
+Do not commit real conversation exports or generated private reports to a public repository.
 
 ## Roadmap
 
-- [x] HTML dashboard with visualizations
-- [ ] Comparison mode: your patterns vs public datasets
-- [ ] Prompt quality scoring (specificity, context density)
-- [ ] Time-series analysis (how your prompting evolves)
-- [ ] Claude / Gemini / Grok export support
+- [x] HTML dashboard prototype
+- [ ] Comparison mode across exports/time periods
+- [ ] Prompt quality heuristics: specificity, context density, constraint clarity
+- [ ] Time-series analysis: how prompting changes over time
+- [ ] Claude / Gemini / Grok export adapters
 - [ ] Plugin system for custom analyzers
 
 ## License
@@ -161,4 +146,4 @@ MIT
 
 ---
 
-*Built by [Ryan](https://github.com/dodge1218) at [DreamSiteBuilders.com](https://dreamsitebuilders.com).*
+Built by [Ryan Vonbrubeck](https://github.com/dodge1218).
